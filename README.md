@@ -11,7 +11,7 @@ This script automatically login on WL and PRG.
 5. Save.
 
 ## Usage
-1. Go to WL/PRG login page and click *Auto login* ( https://www.screencast.com/t/OBf6yQ1xA ) and it will prompt to request to studio click *Allow always domain* ( https://www.screencast.com/t/uo4FC5VGsj ).
+1. Go to WL/PRG login page and click *Auto login* ( https://www.screencast.com/t/OBf6yQ1xA ) and it will prompt to request to studio click *Allow always* ( https://www.screencast.com/t/uo4FC5VGsj ).
 2. Wait
 3. PROFIT!
 
