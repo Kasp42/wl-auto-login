@@ -25,6 +25,7 @@ const S_COOKIE = ''; // You need set your cookie from studio.
 const URL_PASSPORT_USER = 'https://dev.1024.info/ru-default/passport/user/'+S_LOGIN+'/view.html';
 let URL_PASSWORD = GM_getValue('URL_PASSWORD','');
 let IS_PRG = false;
+let IS_LOADING = false;
 
 (function() {
     'use strict';
@@ -52,7 +53,7 @@ let IS_PRG = false;
             jq_label_login_input = jq_label[0].getElementsByClassName('type-text')[0];
             jq_label_password_input = jq_label[1].getElementsByClassName('type-text')[0];
 
-            jq_label_login.innerHTML = jq_label_login.innerHTML+'(  <span style="color: #6495ed;" id="wl-auto-login">Auto Login</span>)';
+            jq_label_login.innerHTML = jq_label_login.innerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;" id="wl-auto-login">Auto Login</span>)';
         }
         else
         {
@@ -60,7 +61,7 @@ let IS_PRG = false;
 
             jq_label_login_input = jq_passport_login_form[0];
             jq_label_password_input = jq_passport_login_form[1];
-            jq_passport_login_form[2].outerHTML = jq_passport_login_form[2].outerHTML+'(  <span style="color: #6495ed;" id="wl-auto-login">Auto Login</span>)';
+            jq_passport_login_form[2].outerHTML = jq_passport_login_form[2].outerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;font-size: larger;" id="wl-auto-login">Auto Login</span>)';
         }
 
         let jq_auto_login = document.getElementById('wl-auto-login');
@@ -68,10 +69,20 @@ let IS_PRG = false;
         {
             jq_auto_login.onclick = function()
             {
+                if(!S_LOGIN)
+                {
+                    return alert('You need set you login in script.');
+                }
+                if(IS_LOADING)
+                {
+                    return false;
+                }
+                IS_LOADING = true;
                 getPasswordUrl(function(){
                     setPassword(function(s_password){
                         jq_label_login_input.value = S_LOGIN;
                         jq_label_password_input.value = s_password;
+                        IS_LOADING = false;
                         if(IS_PRG)
                         {
                             jq_passport_login_form[2].click();
@@ -106,6 +117,7 @@ function setPassword(callback)
                 let a_result = JSON.parse(response.responseText.replace('JsHttpRequest.dataReady(','').replace(');',''));
                 if(a_result.js.s_state !== 'ok')
                 {
+                    IS_LOADING = false;
                     return alert('Error setting password: '+a_result.js.s_error);
                 }
                 else if(a_result.js.s_state === 'csrf')
@@ -117,6 +129,11 @@ function setPassword(callback)
                     });
                 }
                 callback(s_password);
+            }
+            else
+            {
+                console.debug(response);
+                return alert('Error setting password. Status: '+response.status);
             }
         }
     });
@@ -146,6 +163,7 @@ function getPasswordUrl(callback)
 
                 if(!jq_password_container)
                 {
+                    IS_LOADING = false;
                     jq_auto_login_studio.remove();
                     return alert('You are not logged-in to the studio.');
                 }
@@ -154,6 +172,11 @@ function getPasswordUrl(callback)
                 GM_setValue('URL_PASSWORD',jq_password_container.href);
                 jq_auto_login_studio.remove();
                 callback();
+            }
+            else
+            {
+                console.debug(response);
+                return alert('Error get link. Status: '+response.status);
             }
         }
     });
