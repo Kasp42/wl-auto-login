@@ -4,8 +4,8 @@ This script automatically login on WL and PRG.
 
 ## Installation
 
-1. Make sure you have [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) if you're using Firefox, or [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) if you're using Chrome. Steam Fast Farm Card will not work without Greasemonkey or Tampermonkey.
-2. After Greasemonkey/Tampermonkey are installed, visit https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js and it will prompt you to install the script.
+1. Make sure you have [Tampermonkey(for Firefox)](https://addons.mozilla.org/ru/firefox/addon/tampermonkey/) if you're using Firefox, or [Tampermonkey(for Chrome)](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) if you're using Chrome. WellnessLiving auto login will not work without Greasemonkey or Tampermonkey.
+2. After Tampermonkey are installed, visit https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js and it will prompt you to install the script.
 3. Go to Greasemonkey/Tampermonkey and select script.
 4. Put you login at line 21.
 5. Save.
