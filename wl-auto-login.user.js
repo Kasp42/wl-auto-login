@@ -13,8 +13,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @downloadURL  https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl.auto.login.user.js
-// @updateURL    https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl.auto.login.user.js
+// @downloadURL  https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
+// @updateURL    https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
 // ==/UserScript==
 
 
