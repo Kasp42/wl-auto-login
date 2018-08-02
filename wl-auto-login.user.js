@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      0.2
+// @version      0.3
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -114,13 +114,9 @@ function setPassword(callback)
         {
             if(response.readyState == 4 && response.status == 200)
             {
+                IS_LOADING = false;
                 let a_result = JSON.parse(response.responseText.replace('JsHttpRequest.dataReady(','').replace(');',''));
-                if(a_result.js.s_state !== 'ok')
-                {
-                    IS_LOADING = false;
-                    return alert('Error setting password: '+a_result.js.s_error);
-                }
-                else if(a_result.js.s_state === 'csrf')
+                if(a_result.js.s_state === 'csrf')
                 {
                     URL_PASSWORD = '';
                     GM_setValue('URL_PASSWORD','');
@@ -128,6 +124,11 @@ function setPassword(callback)
                         setPassword(callback);
                     });
                 }
+                if(a_result.js.s_state !== 'ok')
+                {
+                    
+                    return alert('Error setting password: '+a_result.js.s_error);
+                } 
                 callback(s_password);
             }
             else
