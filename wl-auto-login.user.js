@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      0.5
+// @version      0.6
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -38,6 +38,11 @@ let IS_LOADING = false;
 
     if(!jq_passport_login_form)
     {
+        jq_passport_login_form = document.getElementById('ProgLogin');
+        IS_PRG = true;
+    }
+    if(!jq_passport_login_form)
+    {
         jq_passport_login_form = document.getElementById('core-prg-login-form');
         IS_PRG = true;
     }
@@ -71,7 +76,11 @@ let IS_LOADING = false;
             {
                 if(!S_LOGIN)
                 {
-                    return alert('You need set you login in script.');
+                    S_LOGIN = GM_getValue('S_LOGIN');
+                    if(!S_LOGIN)
+                    {
+                        return alert('You need set you login in script.');
+                    }
                 }
                 if(IS_LOADING)
                 {
@@ -83,6 +92,7 @@ let IS_LOADING = false;
                         jq_label_login_input.value = S_LOGIN;
                         jq_label_password_input.value = s_password;
                         IS_LOADING = false;
+                        GM_setValue('S_LOGIN',S_LOGIN);
                         if(IS_PRG)
                         {
                             jq_passport_login_form[2].click();
