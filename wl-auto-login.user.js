@@ -35,6 +35,10 @@ let IS_LOADING = false;
     {
         jq_passport_login_form = document.getElementById('passport_login_small');
     }
+    if(!jq_passport_login_form)
+    {
+        jq_passport_login_form = document.getElementById('wl-login-form-business');
+    }
 
     if(!jq_passport_login_form)
     {
