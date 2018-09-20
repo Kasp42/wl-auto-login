@@ -18,7 +18,7 @@
 // ==/UserScript==
 
 
-const S_LOGIN = ''; // You need set your login.
+let S_LOGIN = ''; // You need set your login.
 
 // TODO: Add suport incognito.
 const S_COOKIE = ''; // You need set your cookie from studio.
