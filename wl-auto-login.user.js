@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      0.8
+// @version      0.9
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -22,7 +22,6 @@ let S_LOGIN = ''; // You need set your login.
 
 // TODO: Add suport incognito.
 const S_COOKIE = ''; // You need set your cookie from studio.
-const URL_PASSPORT_USER = 'https://dev.1024.info/ru-default/passport/user/'+S_LOGIN+'/view.html';
 let URL_PASSWORD = GM_getValue('URL_PASSWORD','');
 let IS_PRG = false;
 let IS_LOADING = false;
@@ -163,7 +162,7 @@ function getPasswordUrl(callback)
 
     var xmlRequest = GM_xmlhttpRequest({
         'method': 'GET',
-        'url': URL_PASSPORT_USER,
+        'url': 'https://dev.1024.info/ru-default/passport/user/'+S_LOGIN+'/view.html',
         'onload': function(response)
         {
             if(response.readyState == 4 && response.status == 200)
