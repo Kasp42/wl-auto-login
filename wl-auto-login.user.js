@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      0.9
+// @version      1.0
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -10,9 +10,10 @@
 // @match        *://*.wellnessliving.local/*
 // @match        *://wl.tr/*
 // @match        *://wl.st/*
-// @grant        GM_xmlhttpRequest
-// @grant        GM_setValue
+// @grant        GM_deleteValue
 // @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_xmlhttpRequest
 // @downloadURL  https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
 // @updateURL    https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
 // ==/UserScript==
