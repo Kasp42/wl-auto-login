@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      1.0
+// @version      1.1
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -28,333 +28,333 @@ let IS_PRG = false;
 let IS_LOADING = false;
 
 (function() {
-    'use strict';
+  'use strict';
 
-    let jq_passport_login_form = document.getElementById('passport_login_form');
-    if(!jq_passport_login_form)
+  let jq_passport_login_form = document.getElementById('passport_login_form');
+  if(!jq_passport_login_form)
+  {
+    jq_passport_login_form = document.getElementById('passport_login_small');
+  }
+  if(!jq_passport_login_form)
+  {
+    jq_passport_login_form = document.getElementById('wl-login-form-business');
+  }
+
+  if(!jq_passport_login_form)
+  {
+    jq_passport_login_form = document.getElementById('ProgLogin');
+    IS_PRG = true;
+  }
+  if(!jq_passport_login_form)
+  {
+    jq_passport_login_form = document.getElementById('core-prg-login-form');
+    IS_PRG = true;
+  }
+
+  if(jq_passport_login_form)
+  {
+    let jq_label, jq_label_login,jq_label_login_input,jq_label_password_input;
+    if(!IS_PRG)
     {
-        jq_passport_login_form = document.getElementById('passport_login_small');
+      jq_label = jq_passport_login_form.getElementsByClassName('wl-login-form-label');
+
+      jq_label_login = jq_label[0].getElementsByClassName('sign')[0];
+      jq_label_login_input = jq_label[0].getElementsByClassName('type-text')[0];
+      jq_label_password_input = jq_label[1].getElementsByClassName('type-text')[0];
+
+      jq_label_login.innerHTML = jq_label_login.innerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;" id="wl-auto-login">Auto Login</span>)';
     }
-    if(!jq_passport_login_form)
+    else
     {
-        jq_passport_login_form = document.getElementById('wl-login-form-business');
+      jq_passport_login_form = jq_passport_login_form.getElementsByTagName('table')[0].getElementsByTagName('input');
+
+      jq_label_login_input = jq_passport_login_form[0];
+      jq_label_password_input = jq_passport_login_form[1];
+      jq_passport_login_form[2].outerHTML = jq_passport_login_form[2].outerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;font-size: larger;" id="wl-auto-login">Auto Login</span>)';
     }
 
-    if(!jq_passport_login_form)
+    let jq_auto_login = document.getElementById('wl-auto-login');
+    if(jq_auto_login)
     {
-        jq_passport_login_form = document.getElementById('ProgLogin');
-        IS_PRG = true;
-    }
-    if(!jq_passport_login_form)
-    {
-        jq_passport_login_form = document.getElementById('core-prg-login-form');
-        IS_PRG = true;
-    }
-
-    if(jq_passport_login_form)
-    {
-        let jq_label, jq_label_login,jq_label_login_input,jq_label_password_input;
-        if(!IS_PRG)
+      jq_auto_login.onclick = function()
+      {
+        if(!S_LOGIN)
         {
-            jq_label = jq_passport_login_form.getElementsByClassName('wl-login-form-label');
-
-            jq_label_login = jq_label[0].getElementsByClassName('sign')[0];
-            jq_label_login_input = jq_label[0].getElementsByClassName('type-text')[0];
-            jq_label_password_input = jq_label[1].getElementsByClassName('type-text')[0];
-
-            jq_label_login.innerHTML = jq_label_login.innerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;" id="wl-auto-login">Auto Login</span>)';
+          S_LOGIN = GM_getValue('S_LOGIN');
+          if(!S_LOGIN)
+          {
+            return alert('You need set you login in script.');
+          }
         }
-        else
+        if(IS_LOADING)
         {
-            jq_passport_login_form = jq_passport_login_form.getElementsByTagName('table')[0].getElementsByTagName('input');
-
-            jq_label_login_input = jq_passport_login_form[0];
-            jq_label_password_input = jq_passport_login_form[1];
-            jq_passport_login_form[2].outerHTML = jq_passport_login_form[2].outerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;font-size: larger;" id="wl-auto-login">Auto Login</span>)';
+          return false;
         }
-
-        let jq_auto_login = document.getElementById('wl-auto-login');
-        if(jq_auto_login)
-        {
-            jq_auto_login.onclick = function()
+        IS_LOADING = true;
+        getPasswordUrl(function(){
+          setPassword(function(s_password){
+            jq_label_login_input.value = S_LOGIN;
+            jq_label_password_input.value = s_password;
+            IS_LOADING = false;
+            GM_setValue('S_LOGIN',S_LOGIN);
+            if(IS_PRG)
             {
-                if(!S_LOGIN)
-                {
-                    S_LOGIN = GM_getValue('S_LOGIN');
-                    if(!S_LOGIN)
-                    {
-                        return alert('You need set you login in script.');
-                    }
-                }
-                if(IS_LOADING)
-                {
-                    return false;
-                }
-                IS_LOADING = true;
-                getPasswordUrl(function(){
-                    setPassword(function(s_password){
-                        jq_label_login_input.value = S_LOGIN;
-                        jq_label_password_input.value = s_password;
-                        IS_LOADING = false;
-                        GM_setValue('S_LOGIN',S_LOGIN);
-                        if(IS_PRG)
-                        {
-                            jq_passport_login_form[2].click();
-                        }
-                        else
-                        {
-                            jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
-                        }
-                    });
-                });
-            };
-        }
+              jq_passport_login_form[2].click();
+            }
+            else
+            {
+              jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
+            }
+          });
+        });
+      };
     }
+  }
 })();
 
 function setPassword(callback)
 {
-    let s_password = a_password(24);
-    GM_xmlhttpRequest({
-        'method': 'GET',
-        'headers': {
-            'Cookie': S_COOKIE
-        },
-        'url': a_url_variable(URL_PASSWORD,{
-            's_password': s_password,
-            'JsHttpRequest': '15326152185230-script'
-        }),
-        'onload': function(response)
+  let s_password = a_password(24);
+  GM_xmlhttpRequest({
+    'method': 'GET',
+    'headers': {
+      'Cookie': S_COOKIE
+    },
+    'url': a_url_variable(URL_PASSWORD,{
+      's_password': s_password,
+      'JsHttpRequest': '15326152185230-script'
+    }),
+    'onload': function(response)
+    {
+      if(response.readyState == 4 && response.status == 200)
+      {
+        IS_LOADING = false;
+        let a_result = JSON.parse(response.responseText.replace('JsHttpRequest.dataReady(','').replace(');',''));
+        if(a_result.js.s_state === 'csrf')
         {
-            if(response.readyState == 4 && response.status == 200)
-            {
-                IS_LOADING = false;
-                let a_result = JSON.parse(response.responseText.replace('JsHttpRequest.dataReady(','').replace(');',''));
-                if(a_result.js.s_state === 'csrf')
-                {
-                    console.log('[CSRF] Load url');
-                    URL_PASSWORD = '';
-                    GM_setValue('URL_PASSWORD','');
-                    return getPasswordUrl(function(){
-                        setPassword(callback);
-                    });
-                }
-                if(a_result.js.s_state !== 'ok')
-                {
-                    return alert('Error setting password: '+a_result.js.s_error);
-                }
-                callback(s_password);
-            }
-            else
-            {
-                console.debug(response);
-                return alert('Error setting password. Status: '+response.status);
-            }
+          console.log('[CSRF] Load url');
+          URL_PASSWORD = '';
+          GM_setValue('URL_PASSWORD','');
+          return getPasswordUrl(function(){
+            setPassword(callback);
+          });
         }
-    });
+        if(a_result.js.s_state !== 'ok')
+        {
+          return alert('Error setting password: '+a_result.js.s_error);
+        }
+        callback(s_password);
+      }
+      else
+      {
+        console.debug(response);
+        return alert('Error setting password. Status: '+response.status);
+      }
+    }
+  });
 }
 
 function getPasswordUrl(callback)
 {
-    if(URL_PASSWORD)
+  if(URL_PASSWORD)
+  {
+    return callback();
+  }
+
+  var xmlRequest = GM_xmlhttpRequest({
+    'method': 'GET',
+    'url': 'https://dev.1024.info/ru-default/passport/user/'+S_LOGIN+'/view.html',
+    'onload': function(response)
     {
-        return callback();
-    }
+      if(response.readyState == 4 && response.status == 200)
+      {
+        let o_div = document.createElement('div');
+        o_div.style.display = 'none';
+        o_div.setAttribute('id', 'wl-auto-login-studio');
+        o_div.innerHTML = response.responseText;
+        document.body.appendChild(o_div);
+        let jq_auto_login_studio = document.getElementById('wl-auto-login-studio');
+        let jq_password_container = document.getElementById('studio-index-toolbar-password-container');
 
-    var xmlRequest = GM_xmlhttpRequest({
-        'method': 'GET',
-        'url': 'https://dev.1024.info/ru-default/passport/user/'+S_LOGIN+'/view.html',
-        'onload': function(response)
+        if(!jq_password_container)
         {
-            if(response.readyState == 4 && response.status == 200)
-            {
-                let o_div = document.createElement('div');
-                o_div.style.display = 'none';
-                o_div.setAttribute('id', 'wl-auto-login-studio');
-                o_div.innerHTML = response.responseText;
-                document.body.appendChild(o_div);
-                let jq_auto_login_studio = document.getElementById('wl-auto-login-studio');
-                let jq_password_container = document.getElementById('studio-index-toolbar-password-container');
-
-                if(!jq_password_container)
-                {
-                    IS_LOADING = false;
-                    jq_auto_login_studio.remove();
-                    return alert('You are not logged-in to the studio.');
-                }
-
-                URL_PASSWORD = jq_password_container.href;
-                GM_setValue('URL_PASSWORD',jq_password_container.href);
-                jq_auto_login_studio.remove();
-                callback();
-            }
-            else
-            {
-                console.debug(response);
-                return alert('Error get link. Status: '+response.status);
-            }
+          IS_LOADING = false;
+          jq_auto_login_studio.remove();
+          return alert('You are not logged-in to the studio or sets incorrect login.');
         }
-    });
+
+        URL_PASSWORD = jq_password_container.href;
+        GM_setValue('URL_PASSWORD',jq_password_container.href);
+        jq_auto_login_studio.remove();
+        callback();
+      }
+      else
+      {
+        console.debug(response);
+        return alert('Error get link. Status: '+response.status);
+      }
+    }
+  });
 }
 
 function a_url_encode(s_name, x_value) {
-    var s_name_encode = encodeURIComponent(s_name);
+  var s_name_encode = encodeURIComponent(s_name);
 
-    if (x_value === true)
+  if (x_value === true)
+  {
+    return s_name_encode + '=1';
+  }
+  if (x_value === false)
+  {
+    return s_name_encode + '=0';
+  }
+
+  var s_type = typeof (x_value);
+
+  if (s_type === 'number')
+  {
+    return s_name_encode + '=' + x_value.toString();
+  }
+  if (s_type === 'string')
+  {
+    return s_name_encode + '=' + encodeURIComponent(x_value);
+  }
+
+  if (s_type !== 'object')
+  {
+    return s_name_encode;
+  }
+
+  var a_result = [];
+  var i;
+  var x_element;
+  var s_key;
+
+  var is_index = x_value instanceof Array;
+
+  for (s_key in x_value) {
+    if (!x_value.hasOwnProperty(s_key))
     {
-        return s_name_encode + '=1';
+      continue;
     }
-    if (x_value === false)
+
+    x_element = a_url_encode(s_name + '[' + (is_index ? '' : s_key) + ']', x_value[s_key]);
+    if (typeof (x_element) === 'string')
     {
-        return s_name_encode + '=0';
+      a_result.push(x_element);
     }
-
-    var s_type = typeof (x_value);
-
-    if (s_type === 'number')
-    {
-        return s_name_encode + '=' + x_value.toString();
+    else {
+      for (i = 0; i < x_element.length; i++)
+      {
+        a_result.push(x_element[i]);
+      }
     }
-    if (s_type === 'string')
-    {
-        return s_name_encode + '=' + encodeURIComponent(x_value);
-    }
-
-    if (s_type !== 'object')
-    {
-        return s_name_encode;
-    }
-
-    var a_result = [];
-    var i;
-    var x_element;
-    var s_key;
-
-    var is_index = x_value instanceof Array;
-
-    for (s_key in x_value) {
-        if (!x_value.hasOwnProperty(s_key))
-        {
-            continue;
-        }
-
-        x_element = a_url_encode(s_name + '[' + (is_index ? '' : s_key) + ']', x_value[s_key]);
-        if (typeof (x_element) === 'string')
-        {
-            a_result.push(x_element);
-        }
-        else {
-            for (i = 0; i < x_element.length; i++)
-            {
-                a_result.push(x_element[i]);
-            }
-        }
-    }
-    return a_result;
+  }
+  return a_result;
 }
 
 function a_url_variable(url_source, a_change) {
-    var i_fragment = url_source.lastIndexOf('#');
-    var i_query = url_source.indexOf('?');
-    var s_variable;
-    var a_new = {};
+  var i_fragment = url_source.lastIndexOf('#');
+  var i_query = url_source.indexOf('?');
+  var s_variable;
+  var a_new = {};
 
-    for (s_variable in a_change) {
-        if (!a_change.hasOwnProperty(s_variable))
-        {
-            continue;
-        }
-
-        var x_value = a_change[s_variable];
-        if (x_value !== false && x_value !== null && x_value !== undefined)
-        {
-            a_new[encodeURIComponent(s_variable)] = a_url_encode(s_variable, a_change[s_variable]);
-        }
-    }
-
-    if (i_query >= 0) {
-        var s_query = url_source.substr(i_query + 1, (i_fragment < 0 ? url_source.length : i_fragment) - i_query - 1);
-        if (s_query.length) {
-            var a_pair = s_query.split('&');
-            for (var i_pair in a_pair) {
-                if (!a_pair.hasOwnProperty(i_pair))
-                {
-                    continue;
-                }
-
-                var a_pair_item = a_pair[i_pair].split('=', 2);
-                a_pair_item = a_pair_item[0].split('[', 2);
-                a_pair_item = a_pair_item[0].split('%5B', 2);
-
-                var s_name_variable = a_pair_item[0];
-
-                if (!a_change.hasOwnProperty(s_name_variable))
-                {
-                    if (s_name_variable.indexOf('a_') > -1)
-                    {
-                        if (!a_new.hasOwnProperty(s_name_variable))
-                        {
-                            a_new[s_name_variable] = [];
-                        }
-
-                        a_new[s_name_variable].push(a_pair[i_pair]);
-                    }
-                    else
-                    {
-                        a_new[s_name_variable] = a_pair[i_pair];
-                    }
-                }
-            }
-        }
-    }
-
-    var a_query = [];
-    for (s_variable in a_new)
+  for (s_variable in a_change) {
+    if (!a_change.hasOwnProperty(s_variable))
     {
-        if (!a_new.hasOwnProperty(s_variable))
+      continue;
+    }
+
+    var x_value = a_change[s_variable];
+    if (x_value !== false && x_value !== null && x_value !== undefined)
+    {
+      a_new[encodeURIComponent(s_variable)] = a_url_encode(s_variable, a_change[s_variable]);
+    }
+  }
+
+  if (i_query >= 0) {
+    var s_query = url_source.substr(i_query + 1, (i_fragment < 0 ? url_source.length : i_fragment) - i_query - 1);
+    if (s_query.length) {
+      var a_pair = s_query.split('&');
+      for (var i_pair in a_pair) {
+        if (!a_pair.hasOwnProperty(i_pair))
         {
-            continue;
+          continue;
         }
 
-        var x_variable = a_new[s_variable];
+        var a_pair_item = a_pair[i_pair].split('=', 2);
+        a_pair_item = a_pair_item[0].split('[', 2);
+        a_pair_item = a_pair_item[0].split('%5B', 2);
 
-        if (typeof (x_variable) === 'string')
+        var s_name_variable = a_pair_item[0];
+
+        if (!a_change.hasOwnProperty(s_name_variable))
         {
-            a_query.push(x_variable);
-        }
-        else
-        {
-            for (var s_key in x_variable)
+          if (s_name_variable.indexOf('a_') > -1)
+          {
+            if (!a_new.hasOwnProperty(s_name_variable))
             {
-                if (x_variable.hasOwnProperty(s_key))
-                {
-                    a_query.push(x_variable[s_key]);
-                }
+              a_new[s_name_variable] = [];
             }
+
+            a_new[s_name_variable].push(a_pair[i_pair]);
+          }
+          else
+          {
+            a_new[s_name_variable] = a_pair[i_pair];
+          }
         }
+      }
+    }
+  }
+
+  var a_query = [];
+  for (s_variable in a_new)
+  {
+    if (!a_new.hasOwnProperty(s_variable))
+    {
+      continue;
     }
 
-    var url_result = url_source.substr(0, i_query >= 0 ? i_query : (i_fragment >= 0 ? i_fragment : url_source.length));
-    if (a_query.length)
-    {
-        url_result += '?' + a_query.join('&');
-    }
-    if (i_fragment >= 0)
-    {
-        url_result += url_source.substr(i_fragment);
-    }
+    var x_variable = a_new[s_variable];
 
-    return url_result;
+    if (typeof (x_variable) === 'string')
+    {
+      a_query.push(x_variable);
+    }
+    else
+    {
+      for (var s_key in x_variable)
+      {
+        if (x_variable.hasOwnProperty(s_key))
+        {
+          a_query.push(x_variable[s_key]);
+        }
+      }
+    }
+  }
+
+  var url_result = url_source.substr(0, i_query >= 0 ? i_query : (i_fragment >= 0 ? i_fragment : url_source.length));
+  if (a_query.length)
+  {
+    url_result += '?' + a_query.join('&');
+  }
+  if (i_fragment >= 0)
+  {
+    url_result += url_source.substr(i_fragment);
+  }
+
+  return url_result;
 }
 
 function a_password(i_length) {
-    var s_symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+  var s_symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 
-    var r = '';
-    for (var i = 0; i < i_length; i++)
-    {
-        var c = Math.round((Math.random() * 10000000)) % s_symbols.length;
-        r = r + s_symbols.charAt(c);
-    }
-    return r;
+  var r = '';
+  for (var i = 0; i < i_length; i++)
+  {
+    var c = Math.round((Math.random() * 10000000)) % s_symbols.length;
+    r = r + s_symbols.charAt(c);
+  }
+  return r;
 }
