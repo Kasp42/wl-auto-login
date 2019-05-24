@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      1.1
+// @version      1.3
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
 // @match        *://wellnessliving.com/*
 // @match        *://wellnessliving.local/*
 // @match        *://*.wellnessliving.local/*
+// @match        *://dev.1024.info/*
 // @match        *://wl.tr/*
 // @match        *://wl.st/*
 // @grant        GM_deleteValue
@@ -23,12 +24,19 @@ let S_LOGIN = ''; // You need set your login.
 
 // TODO: Add suport incognito.
 const S_COOKIE = ''; // You need set your cookie from studio.
-let URL_PASSWORD = GM_getValue('URL_PASSWORD','');
+let URL_PASSWORD = 'https://dev.1024.info/en-default//Studio/Personnel/Password.json';
+let CSRF = GM_getValue('CSRF','');
 let IS_PRG = false;
 let IS_LOADING = false;
 
 (function() {
   'use strict';
+
+  if(window.location.host === 'dev.1024.info')
+  {
+    GM_setValue('CSRF',a_form_csrf_get('core-request-api'));
+    return;
+  }
 
   let jq_passport_login_form = document.getElementById('passport_login_form');
   if(!jq_passport_login_form)
@@ -86,26 +94,28 @@ let IS_LOADING = false;
             return alert('You need set you login in script.');
           }
         }
+        if(!CSRF)
+        {
+          return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
+        }
         if(IS_LOADING)
         {
           return false;
         }
         IS_LOADING = true;
-        getPasswordUrl(function(){
-          setPassword(function(s_password){
-            jq_label_login_input.value = S_LOGIN;
-            jq_label_password_input.value = s_password;
-            IS_LOADING = false;
-            GM_setValue('S_LOGIN',S_LOGIN);
-            if(IS_PRG)
-            {
-              jq_passport_login_form[2].click();
-            }
-            else
-            {
-              jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
-            }
-          });
+        setPassword(function(s_password){
+          jq_label_login_input.value = S_LOGIN;
+          jq_label_password_input.value = s_password;
+          IS_LOADING = false;
+          GM_setValue('S_LOGIN',S_LOGIN);
+          if(IS_PRG)
+          {
+            jq_passport_login_form[2].click();
+          }
+          else
+          {
+            jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
+          }
         });
       };
     }
@@ -114,34 +124,36 @@ let IS_LOADING = false;
 
 function setPassword(callback)
 {
+
   let s_password = a_password(24);
+  let s_data = a_url_variable('',{
+    's_password': s_password,
+    'csrf': CSRF
+  }).slice(1);
+
   GM_xmlhttpRequest({
-    'method': 'GET',
+    'method': 'PUT',
+    'data': s_data,
     'headers': {
       'Cookie': S_COOKIE
     },
-    'url': a_url_variable(URL_PASSWORD,{
-      's_password': s_password,
-      'JsHttpRequest': '15326152185230-script'
-    }),
+    'url': URL_PASSWORD,
     'onload': function(response)
     {
+      IS_LOADING = false;
       if(response.readyState == 4 && response.status == 200)
       {
-        IS_LOADING = false;
-        let a_result = JSON.parse(response.responseText.replace('JsHttpRequest.dataReady(','').replace(');',''));
-        if(a_result.js.s_state === 'csrf')
+        var a_result = JSON.parse(response.responseText);
+        if(a_result.status === 'csrf')
         {
-          console.log('[CSRF] Load url');
-          URL_PASSWORD = '';
-          GM_setValue('URL_PASSWORD','');
-          return getPasswordUrl(function(){
-            setPassword(callback);
-          });
+          CSRF = '';
+          GM_setValue('CSRF','');
+          return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
         }
-        if(a_result.js.s_state !== 'ok')
+
+        if(a_result.status !== 'ok')
         {
-          return alert('Error setting password: '+a_result.js.s_error);
+          return alert('Error setting password: '+a_result.message);
         }
         callback(s_password);
       }
@@ -149,49 +161,6 @@ function setPassword(callback)
       {
         console.debug(response);
         return alert('Error setting password. Status: '+response.status);
-      }
-    }
-  });
-}
-
-function getPasswordUrl(callback)
-{
-  if(URL_PASSWORD)
-  {
-    return callback();
-  }
-
-  var xmlRequest = GM_xmlhttpRequest({
-    'method': 'GET',
-    'url': 'https://dev.1024.info/ru-default/passport/user/'+S_LOGIN+'/view.html',
-    'onload': function(response)
-    {
-      if(response.readyState == 4 && response.status == 200)
-      {
-        let o_div = document.createElement('div');
-        o_div.style.display = 'none';
-        o_div.setAttribute('id', 'wl-auto-login-studio');
-        o_div.innerHTML = response.responseText;
-        document.body.appendChild(o_div);
-        let jq_auto_login_studio = document.getElementById('wl-auto-login-studio');
-        let jq_password_container = document.getElementById('studio-index-toolbar-password-container');
-
-        if(!jq_password_container)
-        {
-          IS_LOADING = false;
-          jq_auto_login_studio.remove();
-          return alert('You are not logged-in to the studio or sets incorrect login.');
-        }
-
-        URL_PASSWORD = jq_password_container.href;
-        GM_setValue('URL_PASSWORD',jq_password_container.href);
-        jq_auto_login_studio.remove();
-        callback();
-      }
-      else
-      {
-        console.debug(response);
-        return alert('Error get link. Status: '+response.status);
       }
     }
   });
