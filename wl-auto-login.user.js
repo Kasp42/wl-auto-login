@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      1.3
+// @version      1.4
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -19,7 +19,6 @@
 // @updateURL    https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
 // ==/UserScript==
 
-
 let S_LOGIN = ''; // You need set your login.
 
 // TODO: Add suport incognito.
@@ -32,9 +31,10 @@ let IS_LOADING = false;
 (function() {
   'use strict';
 
+  // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
   {
-    GM_setValue('CSRF',a_form_csrf_get('core-request-api'));
+    GM_setValue('CSRF',window.a_form_csrf_get());
     return;
   }
 
@@ -103,68 +103,62 @@ let IS_LOADING = false;
           return false;
         }
         IS_LOADING = true;
-        setPassword(function(s_password){
-          jq_label_login_input.value = S_LOGIN;
-          jq_label_password_input.value = s_password;
-          IS_LOADING = false;
-          GM_setValue('S_LOGIN',S_LOGIN);
-          if(IS_PRG)
+
+        let s_password = a_password(24);
+        let s_data = a_url_variable('',{
+          's_password': s_password,
+          'csrf': CSRF
+        }).slice(1);
+
+        GM_xmlhttpRequest({
+          'method': 'PUT',
+          'data': s_data,
+          'headers': {
+            'Cookie': S_COOKIE
+          },
+          'url': URL_PASSWORD,
+          'onload': function(response)
           {
-            jq_passport_login_form[2].click();
-          }
-          else
-          {
-            jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
+            IS_LOADING = false;
+            if(response.readyState == 4 && response.status == 200)
+            {
+              var a_result = JSON.parse(response.responseText);
+              if(a_result.status === 'csrf')
+              {
+                CSRF = '';
+                GM_setValue('CSRF','');
+                return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
+              }
+
+              if(a_result.status !== 'ok')
+              {
+                return alert('Error setting password: '+a_result.message);
+              }
+
+              jq_label_login_input.value = S_LOGIN;
+              jq_label_password_input.value = s_password;
+              IS_LOADING = false;
+              GM_setValue('S_LOGIN',S_LOGIN);
+              if(IS_PRG)
+              {
+                jq_passport_login_form[2].click();
+              }
+              else
+              {
+                jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
+              }
+            }
+            else
+            {
+              console.debug(response);
+              return alert('Error setting password. Status: '+response.status);
+            }
           }
         });
       };
     }
   }
 })();
-
-function setPassword(callback)
-{
-
-  let s_password = a_password(24);
-  let s_data = a_url_variable('',{
-    's_password': s_password,
-    'csrf': CSRF
-  }).slice(1);
-
-  GM_xmlhttpRequest({
-    'method': 'PUT',
-    'data': s_data,
-    'headers': {
-      'Cookie': S_COOKIE
-    },
-    'url': URL_PASSWORD,
-    'onload': function(response)
-    {
-      IS_LOADING = false;
-      if(response.readyState == 4 && response.status == 200)
-      {
-        var a_result = JSON.parse(response.responseText);
-        if(a_result.status === 'csrf')
-        {
-          CSRF = '';
-          GM_setValue('CSRF','');
-          return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
-        }
-
-        if(a_result.status !== 'ok')
-        {
-          return alert('Error setting password: '+a_result.message);
-        }
-        callback(s_password);
-      }
-      else
-      {
-        console.debug(response);
-        return alert('Error setting password. Status: '+response.status);
-      }
-    }
-  });
-}
 
 function a_url_encode(s_name, x_value) {
   var s_name_encode = encodeURIComponent(s_name);
