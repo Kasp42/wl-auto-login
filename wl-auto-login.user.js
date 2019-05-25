@@ -35,7 +35,7 @@ let IS_LOADING = false;
   // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
   {
-    GM_setValue('CSRF',a_form_csrf_get());
+    GM_setValue('CSRF',a_form_csrf_get('core-request-api'));
     return;
   }
 
