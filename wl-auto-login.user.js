@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      1.6
+// @version      1.7
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -11,6 +11,7 @@
 // @match        *://dev.1024.info/*
 // @match        *://wl.tr/*
 // @match        *://wl.st/*
+// @match        *://wl.pr/*
 // @grant        GM_deleteValue
 // @grant        GM_getValue
 // @grant        GM_setValue
