@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      1.8
+// @version      1.9
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -29,6 +29,7 @@ let URL_PASSWORD = 'https://dev.1024.info/en-default//Studio/Personnel/Password.
 let CSRF = GM_getValue('CSRF','');
 let IS_PRG = false;
 let IS_LOADING = false;
+let IS_AUTO_LOGIN_PRG = GM_getValue('IS_AUTO_LOGIN_PRG',false);
 
 (function() {
   'use strict';
@@ -158,6 +159,11 @@ let IS_LOADING = false;
           }
         });
       };
+      
+      if(IS_PRG && IS_AUTO_LOGIN_PRG)
+      {
+        jq_auto_login.onclick();
+      }
     }
   }
 })();
