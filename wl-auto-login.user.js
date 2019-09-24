@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      1.9
+// @version      2.0
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -33,6 +33,11 @@ let IS_AUTO_LOGIN_PRG = GM_getValue('IS_AUTO_LOGIN_PRG',false);
 
 (function() {
   'use strict';
+
+  if(!IS_AUTO_LOGIN_PRG)
+  {
+    GM_setValue('IS_AUTO_LOGIN_PRG',false);
+  }
 
   // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
