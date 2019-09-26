@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      2.0
+// @version      2.1
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -29,15 +29,10 @@ let URL_PASSWORD = 'https://dev.1024.info/en-default//Studio/Personnel/Password.
 let CSRF = GM_getValue('CSRF','');
 let IS_PRG = false;
 let IS_LOADING = false;
-let IS_AUTO_LOGIN_PRG = GM_getValue('IS_AUTO_LOGIN_PRG',false);
+let IS_AUTO_LOGIN_PRG = true;
 
 (function() {
   'use strict';
-
-  if(!IS_AUTO_LOGIN_PRG)
-  {
-    GM_setValue('IS_AUTO_LOGIN_PRG',false);
-  }
 
   // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
@@ -164,7 +159,7 @@ let IS_AUTO_LOGIN_PRG = GM_getValue('IS_AUTO_LOGIN_PRG',false);
           }
         });
       };
-      
+
       if(IS_PRG && IS_AUTO_LOGIN_PRG)
       {
         jq_auto_login.onclick();
