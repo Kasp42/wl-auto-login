@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      2.1
+// @version      2.2
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -12,27 +12,50 @@
 // @match        *://wl.tr/*
 // @match        *://wl.st/*
 // @match        *://wl.pr/*
-// @match        *://studio.trunk/*
+// @match        *://studio.tr/*
 // @grant        GM_deleteValue
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
 // @downloadURL  https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
 // @updateURL    https://raw.githubusercontent.com/Kasp42/wl-auto-login/master/wl-auto-login.user.js
 // ==/UserScript==
 
 let S_LOGIN = ''; // You need set your login.
 
-// TODO: Add suport incognito.
-const S_COOKIE = ''; // You need set your cookie from studio.
-let URL_PASSWORD = 'https://dev.1024.info/en-default//Studio/Personnel/Password.json';
+const S_COOKIE = ''; // You need set your cookie from studio for login in incognito mode.
+let URL_PASSWORD = 'https://dev.1024.info/en-default/Studio/Personnel/Password.json';
 let CSRF = GM_getValue('CSRF','');
 let IS_PRG = false;
 let IS_LOADING = false;
 let IS_AUTO_LOGIN_PRG = true;
+let PRG_LOGIN = GM_getValue('PRG_LOGIN','');
+let PRG_PASSWORD = GM_getValue('PRG_PASSWORD','');
+const IS_LOCAL_SITE = [
+  'wl.tr',
+  'wl.st',
+  'wl.pr',
+  'studio.tr',
+  'wellnessliving.local',
+  'stable.wellnessliving.local'
+].indexOf(window.location.host) >= 0;
+
+let BUTTON_TEMPLATE_WL = '<input id="wl-auto-login" type="button" value="Auto Login" class="button-next wl-login-form-button">';
+let BUTTON_TEMPLATE_PRG = '&nbsp;&nbsp;(<span style="color: #6495ed;cursor: pointer;font-size: larger;" id="wl-auto-login">Auto Login</span>)';
 
 (function() {
   'use strict';
+
+  // Need set value for display in Storage tab.
+  if(!PRG_LOGIN)
+  {
+    GM_setValue('PRG_LOGIN','');
+  }
+  if(!PRG_PASSWORD)
+  {
+    GM_setValue('PRG_PASSWORD','');
+  }
 
   // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
@@ -41,54 +64,65 @@ let IS_AUTO_LOGIN_PRG = true;
     return;
   }
 
-  let jq_passport_login_form = document.getElementById('passport_login_form');
-  if(!jq_passport_login_form)
+  var $ = unsafeWindow.jQuery;
+
+  if($ === undefined)
   {
-    jq_passport_login_form = document.getElementById('passport_login_small');
-  }
-  if(!jq_passport_login_form)
-  {
-    jq_passport_login_form = document.getElementById('wl-login-form-business');
+    console.warn('For using Auto Login need include jQuery in page.');
+    return;
   }
 
-  if(!jq_passport_login_form)
+  let jq_passport_login_form = $('#passport_login_small');
+  if(!jq_passport_login_form.length)
   {
-    jq_passport_login_form = document.getElementById('ProgLogin');
-    IS_PRG = true;
+    jq_passport_login_form = $('#wl-login-form-business');
   }
-  if(!jq_passport_login_form)
+  if(!jq_passport_login_form.length)
   {
-    jq_passport_login_form = document.getElementById('core-prg-login-form');
+    jq_passport_login_form = $('#core-prg-login-form');
     IS_PRG = true;
   }
 
-  if(jq_passport_login_form)
+  if(jq_passport_login_form.length)
   {
-    let jq_label, jq_label_login,jq_label_login_input,jq_label_password_input;
+    let jq_label_login_input,jq_label_password_input;
+    let jq_button_login = jq_passport_login_form.find('[type="submit"]');
     if(!IS_PRG)
     {
-      jq_label = jq_passport_login_form.getElementsByClassName('wl-login-form-label');
-
-      jq_label_login = jq_label[0].getElementsByClassName('sign')[0];
-      jq_label_login_input = jq_label[0].getElementsByClassName('type-text')[0];
-      jq_label_password_input = jq_label[1].getElementsByClassName('type-text')[0];
-
-      jq_label_login.innerHTML = jq_label_login.innerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;" id="wl-auto-login">Auto Login</span>)';
+      jq_label_login_input = jq_passport_login_form.find('[name="login"]');
+      jq_label_password_input = jq_passport_login_form.find('[name="pwd"]');
+      jq_button_login.after(BUTTON_TEMPLATE_WL);
     }
     else
     {
-      jq_passport_login_form = jq_passport_login_form.getElementsByTagName('table')[0].getElementsByTagName('input');
-
-      jq_label_login_input = jq_passport_login_form[0];
-      jq_label_password_input = jq_passport_login_form[1];
-      jq_passport_login_form[2].outerHTML = jq_passport_login_form[2].outerHTML+'&nbsp;&nbsp;(<span style="color: #6495ed;cursor:pointer;font-size: larger;" id="wl-auto-login">Auto Login</span>)';
+      jq_label_login_input = jq_passport_login_form.find('[name="s_login"]');
+      jq_label_password_input = jq_passport_login_form.find('[name="s_password"]');
+      jq_button_login.after(BUTTON_TEMPLATE_PRG);
     }
 
-    let jq_auto_login = document.getElementById('wl-auto-login');
-    if(jq_auto_login)
+    let jq_auto_login = $('#wl-auto-login');
+    if(!jq_auto_login.length)
     {
-      jq_auto_login.onclick = function()
+      console.warn('Auto Login button does not exist.');
+      return;
+    }
+
+    jq_auto_login.click(function()
       {
+        if(
+          IS_LOCAL_SITE &&
+          IS_PRG &&
+          PRG_LOGIN &&
+          PRG_PASSWORD
+        )
+        {
+          jq_label_login_input.val(PRG_LOGIN);
+          jq_label_password_input.val(PRG_PASSWORD);
+          jq_button_login.click();
+
+          return;
+        }
+
         if(!S_LOGIN)
         {
           S_LOGIN = GM_getValue('S_LOGIN');
@@ -138,18 +172,11 @@ let IS_AUTO_LOGIN_PRG = true;
                 return alert('Error setting password: '+a_result.message);
               }
 
-              jq_label_login_input.value = S_LOGIN;
-              jq_label_password_input.value = s_password;
+              jq_label_login_input.val(S_LOGIN);
+              jq_label_password_input.val(s_password);
               IS_LOADING = false;
               GM_setValue('S_LOGIN',S_LOGIN);
-              if(IS_PRG)
-              {
-                jq_passport_login_form[2].click();
-              }
-              else
-              {
-                jq_passport_login_form.getElementsByClassName('wl-login-form-button')[0].click();
-              }
+              jq_button_login.click();
             }
             else
             {
@@ -158,13 +185,12 @@ let IS_AUTO_LOGIN_PRG = true;
             }
           }
         });
-      };
+      });
 
       if(IS_PRG && IS_AUTO_LOGIN_PRG)
       {
-        jq_auto_login.onclick();
+        jq_auto_login.click();
       }
-    }
   }
 })();
 
