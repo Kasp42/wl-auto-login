@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      2.2
+// @version      2.3
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @match        *://*.wellnessliving.com/*
@@ -60,7 +60,7 @@ let BUTTON_TEMPLATE_PRG = '&nbsp;&nbsp;(<span style="color: #6495ed;cursor: poin
   // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
   {
-    GM_setValue('CSRF',a_form_csrf_get('core-request-api'));
+    GM_setValue('CSRF',unsafeWindow.a_form_csrf_get('core-request-api'));
     return;
   }
 
