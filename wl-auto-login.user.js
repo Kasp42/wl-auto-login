@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      2.3
+// @version      2.4
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
+// @icon         https://www.wellnessliving.com/favicon-wl.ico
 // @match        *://*.wellnessliving.com/*
 // @match        *://wellnessliving.com/*
 // @match        *://wellnessliving.local/*
