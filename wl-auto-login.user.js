@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      2.4
+// @version      2.5
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -190,6 +190,11 @@ let BUTTON_TEMPLATE_PRG = '&nbsp;&nbsp;(<span style="color: #6495ed;cursor: poin
 
       if(IS_PRG && IS_AUTO_LOGIN_PRG)
       {
+        if(typeof Core_Debug_ErrorList === 'function' && Core_Debug_ErrorList.a_error_list.length > 0)
+        {
+          alert('Auto login is not working if javascript on page is not compiled or compiled with error.');
+          return;
+        }
         jq_auto_login.click();
       }
   }
