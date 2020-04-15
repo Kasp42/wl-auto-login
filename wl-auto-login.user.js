@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      2.5
+// @version      2.6
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -29,6 +29,7 @@ const S_COOKIE = ''; // You need set your cookie from studio for login in incogn
 let URL_PASSWORD = 'https://dev.1024.info/en-default/Studio/Personnel/Password.json';
 let CSRF = GM_getValue('CSRF','');
 let IS_PRG = false;
+let IS_STUDIO = false;
 let IS_LOADING = false;
 let IS_AUTO_LOGIN_PRG = true;
 let PRG_LOGIN = GM_getValue('PRG_LOGIN','');
@@ -44,6 +45,7 @@ const IS_LOCAL_SITE = [
 
 let BUTTON_TEMPLATE_WL = '<input id="wl-auto-login" type="button" value="Auto Login" class="button-next wl-login-form-button">';
 let BUTTON_TEMPLATE_PRG = '&nbsp;&nbsp;(<span style="color: #6495ed;cursor: pointer;font-size: larger;" id="wl-auto-login">Auto Login</span>)';
+let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="passport-login" style="margin-left: 10px" value="Auto Login">';
 
 (function() {
   'use strict';
@@ -81,24 +83,37 @@ let BUTTON_TEMPLATE_PRG = '&nbsp;&nbsp;(<span style="color: #6495ed;cursor: poin
   if(!jq_passport_login_form.length)
   {
     jq_passport_login_form = $('#core-prg-login-form');
-    IS_PRG = true;
+    if(jq_passport_login_form.length)
+      IS_PRG = true;
+  }
+  if(!jq_passport_login_form.length)
+  {
+    jq_passport_login_form = $('.studio-main-content form[onsubmit*="passport_login_submit"]');
+    if(jq_passport_login_form.length)
+      IS_STUDIO = true;
   }
 
   if(jq_passport_login_form.length)
   {
     let jq_label_login_input,jq_label_password_input;
     let jq_button_login = jq_passport_login_form.find('[type="submit"]');
-    if(!IS_PRG)
-    {
-      jq_label_login_input = jq_passport_login_form.find('[name="login"]');
-      jq_label_password_input = jq_passport_login_form.find('[name="pwd"]');
-      jq_button_login.after(BUTTON_TEMPLATE_WL);
-    }
-    else
+    if(IS_PRG)
     {
       jq_label_login_input = jq_passport_login_form.find('[name="s_login"]');
       jq_label_password_input = jq_passport_login_form.find('[name="s_password"]');
       jq_button_login.after(BUTTON_TEMPLATE_PRG);
+    }
+    else if(IS_STUDIO)
+    {
+      jq_label_login_input = jq_passport_login_form.find('[name="login"]');
+      jq_label_password_input = jq_passport_login_form.find('[name="pwd"]');
+      jq_button_login.after(BUTTON_TEMPLATE_STUDIO);
+    }
+    else
+    {
+      jq_label_login_input = jq_passport_login_form.find('[name="login"]');
+      jq_label_password_input = jq_passport_login_form.find('[name="pwd"]');
+      jq_button_login.after(BUTTON_TEMPLATE_WL);
     }
 
     let jq_auto_login = $('#wl-auto-login');
@@ -109,94 +124,94 @@ let BUTTON_TEMPLATE_PRG = '&nbsp;&nbsp;(<span style="color: #6495ed;cursor: poin
     }
 
     jq_auto_login.click(function()
+    {
+      if(
+        IS_LOCAL_SITE &&
+        IS_PRG &&
+        PRG_LOGIN &&
+        PRG_PASSWORD
+      )
       {
-        if(
-          IS_LOCAL_SITE &&
-          IS_PRG &&
-          PRG_LOGIN &&
-          PRG_PASSWORD
-        )
-        {
-          jq_label_login_input.val(PRG_LOGIN);
-          jq_label_password_input.val(PRG_PASSWORD);
-          jq_button_login.click();
+        jq_label_login_input.val(PRG_LOGIN);
+        jq_label_password_input.val(PRG_PASSWORD);
+        jq_button_login.click();
 
-          return;
-        }
+        return;
+      }
 
+      if(!S_LOGIN)
+      {
+        S_LOGIN = GM_getValue('S_LOGIN');
         if(!S_LOGIN)
         {
-          S_LOGIN = GM_getValue('S_LOGIN');
-          if(!S_LOGIN)
-          {
-            return alert('You need set you login in script.');
-          }
+          return alert('You need set you login in script.');
         }
-        if(!CSRF)
-        {
-          return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
-        }
-        if(IS_LOADING)
-        {
-          return false;
-        }
-        IS_LOADING = true;
-
-        let s_password = a_password(24);
-        let s_data = a_url_variable('',{
-          's_password': s_password,
-          'csrf': CSRF
-        }).slice(1);
-
-        GM_xmlhttpRequest({
-          'method': 'PUT',
-          'data': s_data,
-          'headers': {
-            'Cookie': S_COOKIE
-          },
-          'url': URL_PASSWORD,
-          'onload': function(response)
-          {
-            IS_LOADING = false;
-            if(response.readyState == 4 && response.status == 200)
-            {
-              var a_result = JSON.parse(response.responseText);
-              if(a_result.status === 'csrf')
-              {
-                CSRF = '';
-                GM_setValue('CSRF','');
-                return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
-              }
-
-              if(a_result.status !== 'ok')
-              {
-                return alert('Error setting password: '+a_result.message);
-              }
-
-              jq_label_login_input.val(S_LOGIN);
-              jq_label_password_input.val(s_password);
-              IS_LOADING = false;
-              GM_setValue('S_LOGIN',S_LOGIN);
-              jq_button_login.click();
-            }
-            else
-            {
-              console.debug(response);
-              return alert('Error setting password. Status: '+response.status);
-            }
-          }
-        });
-      });
-
-      if(IS_PRG && IS_AUTO_LOGIN_PRG)
-      {
-        if(typeof Core_Debug_ErrorList === 'function' && Core_Debug_ErrorList.a_error_list.length > 0)
-        {
-          alert('Auto login is not working if javascript on page is not compiled or compiled with error.');
-          return;
-        }
-        jq_auto_login.click();
       }
+      if(!CSRF)
+      {
+        return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
+      }
+      if(IS_LOADING)
+      {
+        return false;
+      }
+      IS_LOADING = true;
+
+      let s_password = a_password(24);
+      let s_data = a_url_variable('',{
+        's_password': s_password,
+        'csrf': CSRF
+      }).slice(1);
+
+      GM_xmlhttpRequest({
+        'method': 'PUT',
+        'data': s_data,
+        'headers': {
+          'Cookie': S_COOKIE
+        },
+        'url': URL_PASSWORD,
+        'onload': function(response)
+        {
+          IS_LOADING = false;
+          if(response.readyState == 4 && response.status == 200)
+          {
+            var a_result = JSON.parse(response.responseText);
+            if(a_result.status === 'csrf')
+            {
+              CSRF = '';
+              GM_setValue('CSRF','');
+              return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
+            }
+
+            if(a_result.status !== 'ok')
+            {
+              return alert('Error setting password: '+a_result.message);
+            }
+
+            jq_label_login_input.val(S_LOGIN);
+            jq_label_password_input.val(s_password);
+            IS_LOADING = false;
+            GM_setValue('S_LOGIN',S_LOGIN);
+            jq_button_login.click();
+          }
+          else
+          {
+            console.debug(response);
+            return alert('Error setting password. Status: '+response.status);
+          }
+        }
+      });
+    });
+
+    if(IS_PRG && IS_AUTO_LOGIN_PRG)
+    {
+      if(typeof Core_Debug_ErrorList === 'function' && Core_Debug_ErrorList.a_error_list.length > 0)
+      {
+        alert('Auto login is not working if javascript on page is not compiled or compiled with error.');
+        return;
+      }
+      jq_auto_login.click();
+    }
   }
 })();
 
