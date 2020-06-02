@@ -74,7 +74,10 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
     console.warn('For using Auto Login need include jQuery in page.');
     return;
   }
-
+  
+  // Small feature for developer.
+  $('.css-btn-sign-in').removeAttr('targer');
+  
   let jq_passport_login_form = $('#passport_login_small');
   if(!jq_passport_login_form.length)
   {
