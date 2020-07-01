@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.1
+// @version      3.2
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -18,6 +18,7 @@
 // @match        *://wl.production/*
 // @match        *://wellnessliving.lc/*
 // @match        *://studio.tr/*
+// @match        *://studio.trunk/*
 // @grant        GM_deleteValue
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -40,9 +41,14 @@ let PRG_LOGIN = GM_getValue('PRG_LOGIN','');
 let PRG_PASSWORD = GM_getValue('PRG_PASSWORD','');
 const IS_LOCAL_SITE = [
   'wl.tr',
+  'wl.trunk',
+  'wellnessliving.lc',
   'wl.st',
+  'wl.stable',
   'wl.pr',
+  'wl.production',
   'studio.tr',
+  'studio.trunk',
   'wellnessliving.local',
   'stable.wellnessliving.local'
 ].indexOf(window.location.host) >= 0;
