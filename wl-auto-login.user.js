@@ -16,6 +16,7 @@
 // @match        *://wl.trunk/*
 // @match        *://wl.stable/*
 // @match        *://wl.production/*
+// @match        *://wellnessliving.lc/*
 // @match        *://studio.tr/*
 // @grant        GM_deleteValue
 // @grant        GM_getValue
