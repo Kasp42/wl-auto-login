@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.2
+// @version      3.3
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -19,6 +19,7 @@
 // @match        *://wellnessliving.lc/*
 // @match        *://studio.tr/*
 // @match        *://studio.trunk/*
+// @match        *://localhost/*
 // @grant        GM_deleteValue
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -50,7 +51,8 @@ const IS_LOCAL_SITE = [
   'studio.tr',
   'studio.trunk',
   'wellnessliving.local',
-  'stable.wellnessliving.local'
+  'stable.wellnessliving.local',
+  'localhost'
 ].indexOf(window.location.host) >= 0;
 
 let BUTTON_TEMPLATE_WL = '<input id="wl-auto-login" type="button" value="Auto Login" class="button-next wl-login-form-button">';
