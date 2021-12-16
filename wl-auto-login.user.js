@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.3
+// @version      3.4
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -31,9 +31,8 @@
 
 let S_LOGIN = ''; // You need set your login.
 
-const S_COOKIE = ''; // You need set your cookie from studio for login in incognito mode.
+const S_COOKIE = 't=4tzYJeU0AcztGlGnTnT5AOngxzAfNVKR; p=U7IGrDUpGfJS2aEIi6NA8LEGt7osfwn4'; // You need set your cookie from studio for login in incognito mode.
 let URL_PASSWORD = 'https://dev.1024.info/en-default/Studio/Personnel/Password.json';
-let CSRF = GM_getValue('CSRF','');
 let IS_PRG = false;
 let IS_STUDIO = false;
 let IS_LOADING = false;
@@ -94,6 +93,10 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
   if(!jq_passport_login_form.length)
   {
     jq_passport_login_form = $('#wl-login-form-business');
+  }
+  if(!jq_passport_login_form.length)
+  {
+    jq_passport_login_form = $('.js-passport-login-data-url-force form[onsubmit*="passport_login_submit"]');
   }
   if(!jq_passport_login_form.length)
   {
@@ -162,6 +165,7 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
           return alert('You need set you login in script.');
         }
       }
+      let CSRF = GM_getValue('CSRF','');
       if(!CSRF)
       {
         return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
@@ -193,9 +197,8 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
             var a_result = JSON.parse(response.responseText);
             if(a_result.status === 'csrf')
             {
-              CSRF = '';
               GM_setValue('CSRF','');
-              return alert('CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
+              return alert('[Set password]CSRF code is empty. Please visit studio and reload page for grab CSRF code and after reload this page.');
             }
 
             if(a_result.status !== 'ok')
@@ -220,7 +223,7 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
 
     if(IS_PRG && IS_AUTO_LOGIN_PRG)
     {
-      if(typeof Core_Debug_ErrorList === 'function' && Core_Debug_ErrorList.a_error_list.length > 0)
+      if(typeof Core_Debug_ErrorList !== 'function' || Core_Debug_ErrorList.a_error_list.length > 0)
       {
         alert('Auto login is not working if javascript on page is not compiled or compiled with error.');
         return;
