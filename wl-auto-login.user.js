@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.4
+// @version      3.5
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -160,6 +160,11 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
       if(!S_LOGIN)
       {
         S_LOGIN = GM_getValue('S_LOGIN');
+        if(!S_LOGIN)
+        {
+          S_LOGIN = jq_label_login_input.val();
+          GM_setValue('S_LOGIN',S_LOGIN);
+        }
         if(!S_LOGIN)
         {
           return alert('You need set you login in script.');
