@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wellnessliving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.5
+// @version      3.6
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -115,23 +115,29 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
   {
     let jq_label_login_input,jq_label_password_input;
     let jq_button_login = jq_passport_login_form.find('[type="submit"]');
+
+    let jq_container_auto_login = jq_button_login;
+    let jq_container_tmp = jq_container_auto_login.closest('#core-login-button-container');
+    if(jq_container_tmp.length)
+      jq_container_auto_login = jq_container_tmp;
+
     if(IS_PRG)
     {
       jq_label_login_input = jq_passport_login_form.find('[name="s_login"]');
       jq_label_password_input = jq_passport_login_form.find('[name="s_password"]');
-      jq_button_login.after(BUTTON_TEMPLATE_PRG);
+      jq_container_auto_login.after(BUTTON_TEMPLATE_PRG);
     }
     else if(IS_STUDIO)
     {
       jq_label_login_input = jq_passport_login_form.find('[name="login"]');
       jq_label_password_input = jq_passport_login_form.find('[name="pwd"]');
-      jq_button_login.after(BUTTON_TEMPLATE_STUDIO);
+      jq_container_auto_login.after(BUTTON_TEMPLATE_STUDIO);
     }
     else
     {
       jq_label_login_input = jq_passport_login_form.find('[name="login"]');
       jq_label_password_input = jq_passport_login_form.find('[name="pwd"]');
-      jq_button_login.after(BUTTON_TEMPLATE_WL);
+      jq_container_auto_login.after(BUTTON_TEMPLATE_WL);
     }
 
     let jq_auto_login = $('#wl-auto-login');
