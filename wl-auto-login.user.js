@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Wellnessliving AutoLogin
+// @name         WellnessLiving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.7
+// @version      3.8
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -31,7 +31,7 @@
 
 let S_LOGIN = ''; // You need set your login.
 
-const S_COOKIE = 't=4tzYJeU0AcztGlGnTnT5AOngxzAfNVKR; p=U7IGrDUpGfJS2aEIi6NA8LEGt7osfwn4'; // You need set your cookie from studio for login in incognito mode.
+const S_COOKIE = ''; // You need set your cookie from studio for login in incognito mode.
 let URL_PASSWORD = 'https://dev.1024.info/en-default/Studio/Personnel/Password.json';
 let IS_PRG = false;
 let IS_STUDIO = false;
@@ -74,6 +74,9 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
   // Grab CSFR code for send API request.
   if(window.location.host === 'dev.1024.info')
   {
+    if(typeof unsafeWindow.a_form_csrf_get !== 'function')
+      return;
+
     GM_setValue('CSRF',unsafeWindow.a_form_csrf_get('core-request-api'));
     return;
   }
