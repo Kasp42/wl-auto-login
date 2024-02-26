@@ -84,10 +84,7 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
   var $ = unsafeWindow.jQuery;
 
   if($ === undefined)
-  {
-    console.warn('For using Auto Login need include jQuery in page.');
     return;
-  }
 
   // Small feature for developer.
   $('.css-btn-sign-in').attr('target','').removeAttr('target');
@@ -148,10 +145,7 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
 
     let jq_auto_login = $('#wl-auto-login');
     if(!jq_auto_login.length)
-    {
-      console.warn('Auto Login button does not exist.');
       return;
-    }
 
     jq_auto_login.click(function()
     {
