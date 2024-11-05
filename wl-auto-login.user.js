@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WellnessLiving AutoLogin
 // @namespace    https://dev.1024.info/
-// @version      3.9
+// @version      4.0
 // @description  Log in WL/prg with password from studio.
 // @author       Vladislav Kobzev
 // @icon         https://www.wellnessliving.com/favicon-wl.ico
@@ -146,6 +146,8 @@ let BUTTON_TEMPLATE_STUDIO = '<input id="wl-auto-login" type="button" class="pas
     let jq_auto_login = $('#wl-auto-login');
     if(!jq_auto_login.length)
       return;
+
+    $(unsafeWindow).trigger('resize');
 
     jq_auto_login.click(function()
     {
